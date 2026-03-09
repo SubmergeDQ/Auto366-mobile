@@ -26,4 +26,31 @@ function onDeviceReady() {
 
     console.log('Running cordova-' + cordova.platformId + '@' + cordova.version);
     document.getElementById('deviceready').classList.add('ready');
+    startNodeProject();
 }
+
+// 监听来自 Node 端消息的回调函数
+function channelListener(msg) {
+    console.log('[Cordova] 收到来自Node的消息:' + msg);
+}
+
+// Node.js 引擎启动后的回调
+function startupCallback(err) {
+    if (err) {
+        console.error('Node.js 启动失败:', err);
+    } else {
+        console.log('Node.js 引擎启动成功');
+        // 启动成功后，立即向 Node 发送一条消息
+        nodejs.channel.send('你好，Node！来自Cordova的消息。');
+    }
+}
+
+// 启动 Node.js 项目的函数
+function startNodeProject() {
+    // 1. 设置消息监听器 (监听来自 Node 的 'message' 事件)
+    nodejs.channel.setListener(channelListener);
+    // 2. 启动 Node.js，入口文件为 'main.js'
+    nodejs.start('main.js', startupCallback);
+    // 可选：禁用 stdout/stderr 重定向到 Android logcat
+    // nodejs.start('main.js', startupCallback, { redirectOutputToLogcat: false });
+};

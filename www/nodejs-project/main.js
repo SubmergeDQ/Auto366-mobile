@@ -1,3 +1,4 @@
+const cordova = require('cordova-bridge');
 const crypto = require('crypto');
 const http = require('http')
 const fs = require('fs-extra')
@@ -8,7 +9,7 @@ const path = require('path')
 const { v4: uuidv4 } = require('uuid')
 const FormData = require('form-data');
 const https = require('https');
-const appPath = __dirname;
+const appPath = cordova.app.datadir();
 const tempDir = path.join(appPath, 'temp');
 const ansDir = path.join(appPath, 'answers');
 const fileDir = path.join(appPath, 'file');
@@ -30,7 +31,7 @@ class AnswerProxy {
   // 安全的IPC发送函数
   safeIpcSend(channel, data) {
     try {
-      console.warn(`无法发送IPC消息 [${channel}]`);
+      cordova.channel.post(channel, data);
     } catch (error) {
       console.error(`发送IPC消息失败 [${channel}]:`, error);
     }
@@ -1673,5 +1674,3 @@ class AnswerProxy {
     })
   }
 }
-
-module.exports = AnswerProxy;
