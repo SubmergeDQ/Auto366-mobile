@@ -1,56 +1,135 @@
 /**
-    Licensed to the Apache Software Foundation (ASF) under one
-    or more contributor license agreements.  See the NOTICE file
-    distributed with this work for additional information
-    regarding copyright ownership.  The ASF licenses this file
-    to you under the Apache License, Version 2.0 (the
-    "License"); you may not use this file except in compliance
-    with the License.  You may obtain a copy of the License at
+ * Auto366 Mobile - Cordova Device Ready Handler
+ * 天学网自动化答题工具移动版
+ */
 
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on an
-    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-    KIND, either express or implied.  See the License for the
-    specific language governing permissions and limitations
-    under the License.
-*/
-
-// Wait for the deviceready event before using any of Cordova's device APIs.
-// See https://cordova.apache.org/docs/en/latest/cordova/events/events.html#deviceready
+// 等待设备准备就绪事件
 document.addEventListener('deviceready', onDeviceReady, false);
 
 function onDeviceReady() {
-    // Cordova is now initialized. Have fun!
-
+    console.log('Cordova device ready');
     console.log('Running cordova-' + cordova.platformId + '@' + cordova.version);
-    document.getElementById('deviceready').classList.add('ready');
-    startNodeProject();
+    
+    // 设置状态栏
+    if (window.StatusBar) {
+        StatusBar.styleDefault();
+        StatusBar.overlaysWebView(false);
+        StatusBar.backgroundColorByHexString('#007bff');
+    }
+    
+    // 隐藏启动画面
+    if (navigator.splashscreen) {
+        setTimeout(() => {
+            navigator.splashscreen.hide();
+        }, 2000);
+    }
+    
+    // 处理返回按钮
+    document.addEventListener('backbutton', onBackKeyDown, false);
+    
+    // 处理菜单按钮
+    document.addEventListener('menubutton', onMenuKeyDown, false);
+    
+    // 处理暂停和恢复
+    document.addEventListener('pause', onPause, false);
+    document.addEventListener('resume', onResume, false);
+    
+    // 网络状态监听
+    document.addEventListener('online', onOnline, false);
+    document.addEventListener('offline', onOffline, false);
+    
+    console.log('Cordova initialization complete');
 }
 
-// 监听来自 Node 端消息的回调函数
-function channelListener(msg) {
-    console.log('[Cordova] 收到来自Node的消息:' + msg);
-}
-
-// Node.js 引擎启动后的回调
-function startupCallback(err) {
-    if (err) {
-        console.error('Node.js 启动失败:', err);
+function onBackKeyDown() {
+    // 如果菜单打开，先关闭菜单
+    const sideMenu = document.getElementById('sideMenu');
+    if (sideMenu && sideMenu.classList.contains('open')) {
+        if (window.app) {
+            window.app.closeMenu();
+        }
+        return;
+    }
+    
+    // 如果不在主视图，返回主视图
+    if (window.app && window.app.currentView !== 'proxy') {
+        window.app.showView('proxy');
+        return;
+    }
+    
+    // 确认退出应用
+    if (navigator.notification) {
+        navigator.notification.confirm(
+            '确定要退出Auto366吗？',
+            function(buttonIndex) {
+                if (buttonIndex === 1) {
+                    navigator.app.exitApp();
+                }
+            },
+            'Auto366',
+            ['确定', '取消']
+        );
     } else {
-        console.log('Node.js 引擎启动成功');
-        // 启动成功后，立即向 Node 发送一条消息
-        nodejs.channel.send('你好，Node！来自Cordova的消息。');
+        if (confirm('确定要退出Auto366吗？')) {
+            navigator.app.exitApp();
+        }
     }
 }
 
-// 启动 Node.js 项目的函数
-function startNodeProject() {
-    // 1. 设置消息监听器 (监听来自 Node 的 'message' 事件)
-    nodejs.channel.setListener(channelListener);
-    // 2. 启动 Node.js，入口文件为 'main.js'
-    nodejs.start('main.js', startupCallback);
-    // 可选：禁用 stdout/stderr 重定向到 Android logcat
-    // nodejs.start('main.js', startupCallback, { redirectOutputToLogcat: false });
-};
+function onMenuKeyDown() {
+    // 切换菜单
+    if (window.app) {
+        window.app.toggleMenu();
+    }
+}
+
+function onPause() {
+    console.log('App paused');
+    // 应用暂停时的处理
+    if (window.app) {
+        // 可以在这里保存应用状态
+        window.app.saveSettings();
+    }
+}
+
+function onResume() {
+    console.log('App resumed');
+    // 应用恢复时的处理
+    if (window.app) {
+        // 可以在这里恢复应用状态
+        window.app.loadSettings();
+        window.app.updateUI();
+    }
+}
+
+function onOnline() {
+    console.log('Network online');
+    if (window.app) {
+        window.app.showToast('网络已连接', 'success');
+        window.app.addLog('网络已连接', 'success');
+    }
+}
+
+function onOffline() {
+    console.log('Network offline');
+    if (window.app) {
+        window.app.showToast('网络已断开', 'warning');
+        window.app.addLog('网络已断开', 'warning');
+    }
+}
+
+// 全局错误处理
+window.addEventListener('error', function(e) {
+    console.error('Global error:', e.error);
+    if (window.app) {
+        window.app.addLog(`应用错误: ${e.error.message}`, 'error');
+    }
+});
+
+// 未处理的Promise拒绝
+window.addEventListener('unhandledrejection', function(e) {
+    console.error('Unhandled promise rejection:', e.reason);
+    if (window.app) {
+        window.app.addLog(`Promise错误: ${e.reason}`, 'error');
+    }
+});

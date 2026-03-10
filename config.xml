@@ -1,13 +1,77 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="org.apache.cordova.hellocordova" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>Hello Cordova</name>
+<widget id="com.auto366.mobile" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Auto366 Mobile</name>
     <description>
-        A sample Apache Cordova application that responds to the deviceready event.
+        天学网自动化答题工具移动版 - 解放双手，提高学习效率！
     </description>
-    <author email="dev@cordova.apache.org" href="https://cordova.apache.org">
-        Apache Cordova Team
+    <author email="cyrilguocode@gmail.com" href="https://github.com/cyrilguocode/Auto366">
+        Cyril Guo
     </author>
     <content src="index.html" />
+    
+    <!-- 网络访问权限 -->
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
+    <allow-navigation href="*" />
+    
+    <!-- 平台配置 -->
+    <platform name="android">
+        <allow-intent href="market:*" />
+        <icon density="ldpi" src="img/icon-36.png" />
+        <icon density="mdpi" src="img/icon-48.png" />
+        <icon density="hdpi" src="img/icon-72.png" />
+        <icon density="xhdpi" src="img/icon-96.png" />
+        <icon density="xxhdpi" src="img/icon-144.png" />
+        <icon density="xxxhdpi" src="img/icon-192.png" />
+        <splash density="land-ldpi" src="img/splash-320x200.png" />
+        <splash density="land-mdpi" src="img/splash-480x320.png" />
+        <splash density="land-hdpi" src="img/splash-800x480.png" />
+        <splash density="land-xhdpi" src="img/splash-1280x720.png" />
+        <splash density="port-ldpi" src="img/splash-200x320.png" />
+        <splash density="port-mdpi" src="img/splash-320x480.png" />
+        <splash density="port-hdpi" src="img/splash-480x800.png" />
+        <splash density="port-xhdpi" src="img/splash-720x1280.png" />
+    </platform>
+    
+    <platform name="ios">
+        <allow-intent href="itms:*" />
+        <allow-intent href="itms-apps:*" />
+    </platform>
+    
+    <!-- 插件配置 -->
+    <plugin name="cordova-plugin-whitelist" spec="1" />
+    <plugin name="cordova-plugin-statusbar" spec="2" />
+    <plugin name="cordova-plugin-device" spec="2" />
+    <plugin name="cordova-plugin-file" spec="6" />
+    <plugin name="cordova-plugin-file-transfer" spec="1" />
+    <plugin name="cordova-plugin-network-information" spec="2" />
+    <plugin name="cordova-plugin-dialogs" spec="2" />
+    <plugin name="cordova-plugin-vibration" spec="3" />
+    <plugin name="cordova-plugin-splashscreen" spec="5" />
+    
+    <!-- 权限设置 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    
+    <!-- 应用设置 -->
+    <preference name="DisallowOverscroll" value="true" />
+    <preference name="android-minSdkVersion" value="22" />
+    <preference name="android-targetSdkVersion" value="30" />
+    <preference name="BackupWebStorage" value="none" />
+    <preference name="SplashMaintainAspectRatio" value="true" />
+    <preference name="FadeSplashScreenDuration" value="300" />
+    <preference name="SplashShowOnlyFirstTime" value="false" />
+    <preference name="SplashScreen" value="screen" />
+    <preference name="SplashScreenDelay" value="3000" />
+    
+    <!-- CSP设置 -->
+    <access origin="*" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <allow-intent href="tel:*" />
+    <allow-intent href="sms:*" />
+    <allow-intent href="mailto:*" />
+    <allow-intent href="geo:*" />
 </widget>
