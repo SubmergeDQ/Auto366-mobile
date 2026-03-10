@@ -120,7 +120,7 @@ body {
     padding: 8px;
     border-radius: var(--border-radius-sm);
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     position: relative;
     z-index: 1001;
     min-width: 40px;
@@ -128,14 +128,17 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    will-change: background-color, transform;
 }
 
 .menu-toggle:hover {
     background: var(--light-color);
+    transform: scale(1.05);
 }
 
 .menu-toggle:active {
     background: var(--secondary-color);
+    transform: scale(0.95);
 }
 
 /* 侧边菜单 */
@@ -148,9 +151,10 @@ body {
     background: var(--white);
     box-shadow: var(--shadow-lg);
     z-index: 1100;
-    transition: transform 0.15s ease-out;
+    transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     display: flex;
     flex-direction: column;
+    will-change: transform;
 }
 
 .side-menu.open {
@@ -202,19 +206,36 @@ body {
     padding: 8px 0;
 }
 
+/* 性能优化 */
+.side-menu,
+.menu-overlay,
+.menu-toggle {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+/* 菜单项悬停效果优化 */
 .menu-item {
     display: flex;
     align-items: center;
     padding: 16px 20px;
     color: var(--text-color);
     text-decoration: none;
-    transition: background-color 0.1s ease;
+    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     border-left: 3px solid transparent;
+    will-change: background-color, border-left-color;
 }
 
 .menu-item:hover {
     background: var(--light-color);
     color: var(--primary-color);
+}
+
+.menu-item:active {
+    background: rgba(0, 123, 255, 0.05);
+    transform: scale(0.98);
 }
 
 .menu-item.active {
@@ -257,7 +278,8 @@ body {
     z-index: 1050;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.15s ease-out, visibility 0.15s ease-out;
+    transition: opacity 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), visibility 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: opacity;
 }
 
 .menu-overlay.show {
@@ -355,7 +377,10 @@ body {
 .logs-card,
 .stats-card,
 .settings-card {
-    @extend .card;
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
 }
 
 .card-header {
@@ -448,17 +473,24 @@ body {
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     box-shadow: var(--shadow);
+    will-change: background-color, transform, box-shadow;
 }
 
 .primary-btn:hover {
     background: var(--primary-dark);
     box-shadow: var(--shadow-lg);
+    transform: translateY(-1px);
+}
+
+.primary-btn:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: var(--shadow);
 }
 
 .primary-btn:disabled {
@@ -485,17 +517,23 @@ body {
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     text-decoration: none;
+    will-change: background-color, border-color, transform;
 }
 
 .secondary-btn:hover {
     background: var(--light-color);
     border-color: var(--secondary-color);
+    transform: translateY(-1px);
+}
+
+.secondary-btn:active {
+    transform: translateY(0) scale(0.98);
 }
 
 .full-width {
@@ -1024,6 +1062,7 @@ body {
         --border-color: #404040;
         --text-color: #e0e0e0;
         --text-muted: #a0a0a0;
+        --dark-color: #f8f9fa;
     }
     
     body {
@@ -1037,6 +1076,113 @@ body {
         color: var(--text-color);
         border-color: var(--border-color);
     }
+    
+    /* 确保所有文本在黑暗模式下都是白色 */
+    .navbar-title,
+    .menu-title,
+    .view-title,
+    .card-header h3,
+    .status-label,
+    .toggle-label,
+    .setting-item label,
+    .about-info h4,
+    .about-info p,
+    .log-item span,
+    .menu-item span,
+    .answer-index,
+    .answer-content,
+    .page-info,
+    .app-version span,
+    .toast-message,
+    .no-answers p,
+    .no-rules p,
+    .no-rulesets p {
+        color: var(--text-color) !important;
+    }
+    
+    /* 描述性文本保持稍暗的颜色 */
+    .toggle-description,
+    .setting-description,
+    .about-description,
+    .no-answers small,
+    .no-rules small,
+    .no-rulesets small {
+        color: var(--text-muted) !important;
+    }
+    
+    /* 按钮文本 */
+    .secondary-btn,
+    .link-btn {
+        color: var(--text-color);
+    }
+    
+    .secondary-btn:hover,
+    .link-btn:hover {
+        color: var(--text-color);
+    }
+}
+
+/* 手动黑暗模式类（备用方案） */
+.dark-mode {
+    --white: #1a1a1a;
+    --light-color: #2d2d2d;
+    --border-color: #404040;
+    --text-color: #e0e0e0;
+    --text-muted: #a0a0a0;
+    --dark-color: #f8f9fa;
+}
+
+.dark-mode body {
+    background: #1a1a1a;
+    color: var(--text-color);
+}
+
+.dark-mode .form-input,
+.dark-mode .form-select {
+    background: var(--light-color);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+.dark-mode .navbar-title,
+.dark-mode .menu-title,
+.dark-mode .view-title,
+.dark-mode .card-header h3,
+.dark-mode .status-label,
+.dark-mode .toggle-label,
+.dark-mode .setting-item label,
+.dark-mode .about-info h4,
+.dark-mode .about-info p,
+.dark-mode .log-item span,
+.dark-mode .menu-item span,
+.dark-mode .answer-index,
+.dark-mode .answer-content,
+.dark-mode .page-info,
+.dark-mode .app-version span,
+.dark-mode .toast-message,
+.dark-mode .no-answers p,
+.dark-mode .no-rules p,
+.dark-mode .no-rulesets p {
+    color: var(--text-color) !important;
+}
+
+.dark-mode .toggle-description,
+.dark-mode .setting-description,
+.dark-mode .about-description,
+.dark-mode .no-answers small,
+.dark-mode .no-rules small,
+.dark-mode .no-rulesets small {
+    color: var(--text-muted) !important;
+}
+
+.dark-mode .secondary-btn,
+.dark-mode .link-btn {
+    color: var(--text-color);
+}
+
+.dark-mode .secondary-btn:hover,
+.dark-mode .link-btn:hover {
+    color: var(--text-color);
 }
 
 /* 动画效果 */

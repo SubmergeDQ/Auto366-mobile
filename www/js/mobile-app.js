@@ -38,6 +38,9 @@ class Auto366Mobile {
     initAfterDOM() {
         console.log('DOM ready, initializing app...');
         
+        // 初始化黑暗模式
+        this.initDarkMode();
+        
         // 初始化事件监听器
         this.initEventListeners();
         
@@ -57,6 +60,25 @@ class Auto366Mobile {
         console.log('Auto366Mobile initialization complete');
     }
 
+    initDarkMode() {
+        // 检测系统黑暗模式偏好
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        // 如果系统偏好黑暗模式，添加dark-mode类作为备用
+        if (prefersDark) {
+            document.documentElement.classList.add('dark-mode');
+        }
+        
+        // 监听系统主题变化
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (e.matches) {
+                document.documentElement.classList.add('dark-mode');
+            } else {
+                document.documentElement.classList.remove('dark-mode');
+            }
+        });
+    }
+
     initEventListeners() {
         console.log('Initializing event listeners...');
         
@@ -72,6 +94,15 @@ class Auto366Mobile {
         });
         
         if (menuToggle) {
+            // 使用touchstart而不是click来提高响应速度
+            menuToggle.addEventListener('touchstart', (e) => {
+                console.log('Menu toggle touched');
+                e.preventDefault();
+                e.stopPropagation();
+                this.toggleMenu();
+            }, { passive: false });
+            
+            // 保留click事件作为备用（用于鼠标操作）
             menuToggle.addEventListener('click', (e) => {
                 console.log('Menu toggle clicked');
                 e.preventDefault();
@@ -83,6 +114,13 @@ class Auto366Mobile {
         }
         
         if (menuClose) {
+            menuClose.addEventListener('touchstart', (e) => {
+                console.log('Menu close touched');
+                e.preventDefault();
+                e.stopPropagation();
+                this.closeMenu();
+            }, { passive: false });
+            
             menuClose.addEventListener('click', (e) => {
                 console.log('Menu close clicked');
                 e.preventDefault();
@@ -143,6 +181,7 @@ class Auto366Mobile {
         let startX = 0;
         let startY = 0;
         let startTime = 0;
+        let isDragging = false;
         
         const app = document.getElementById('app');
         if (!app) return;
@@ -151,7 +190,32 @@ class Auto366Mobile {
             startX = e.touches[0].clientX;
             startY = e.touches[0].clientY;
             startTime = Date.now();
+            isDragging = false;
         }, { passive: true });
+        
+        app.addEventListener('touchmove', (e) => {
+            if (!startX || !startY) return;
+            
+            const currentX = e.touches[0].clientX;
+            const currentY = e.touches[0].clientY;
+            const diffX = currentX - startX;
+            const diffY = currentY - startY;
+            
+            // 检查是否主要是水平滑动
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 20) {
+                isDragging = true;
+                const isMenuOpen = document.getElementById('sideMenu').classList.contains('open');
+                
+                // 从左边缘开始的右滑手势
+                if (startX < 30 && diffX > 20 && !isMenuOpen) {
+                    e.preventDefault();
+                }
+                // 菜单打开时的左滑手势
+                else if (diffX < -20 && isMenuOpen) {
+                    e.preventDefault();
+                }
+            }
+        }, { passive: false });
         
         app.addEventListener('touchend', (e) => {
             if (!startX || !startY) return;
@@ -163,18 +227,22 @@ class Auto366Mobile {
             const diffX = endX - startX;
             const diffY = endY - startY;
             const timeDiff = endTime - startTime;
+            const velocity = Math.abs(diffX) / timeDiff; // 像素/毫秒
             
-            // 检查是否为快速滑动（时间小于300ms）且主要是水平方向
-            if (timeDiff < 300 && Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 80) {
+            // 更敏感的判定条件：时间更短或速度更快
+            const isQuickSwipe = timeDiff < 200 || velocity > 0.3;
+            const isHorizontalSwipe = Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50;
+            
+            if (isQuickSwipe && isHorizontalSwipe) {
                 const isMenuOpen = document.getElementById('sideMenu').classList.contains('open');
                 
-                // 从左边缘向右滑动打开菜单
-                if (startX < 50 && diffX > 80 && !isMenuOpen) {
+                // 从左边缘向右滑动打开菜单（更宽的触发区域）
+                if (startX < 40 && diffX > 50 && !isMenuOpen) {
                     e.preventDefault();
-                    this.toggleMenu();
+                    this.openMenu();
                 }
                 // 向左滑动关闭菜单
-                else if (diffX < -80 && isMenuOpen) {
+                else if (diffX < -50 && isMenuOpen) {
                     e.preventDefault();
                     this.closeMenu();
                 }
@@ -184,6 +252,7 @@ class Auto366Mobile {
             startX = 0;
             startY = 0;
             startTime = 0;
+            isDragging = false;
         }, { passive: false });
     }
 
@@ -199,11 +268,31 @@ class Auto366Mobile {
         });
         
         if (sideMenu && menuOverlay) {
-            sideMenu.classList.toggle('open');
-            menuOverlay.classList.toggle('show');
-            console.log('Menu toggled, now open:', sideMenu.classList.contains('open'));
+            const isOpen = sideMenu.classList.contains('open');
+            if (isOpen) {
+                this.closeMenu();
+            } else {
+                this.openMenu();
+            }
         } else {
             console.error('Menu elements not found in toggleMenu');
+        }
+    }
+
+    openMenu() {
+        console.log('openMenu called');
+        const sideMenu = document.getElementById('sideMenu');
+        const menuOverlay = document.getElementById('menuOverlay');
+        
+        if (sideMenu && menuOverlay) {
+            sideMenu.classList.add('open');
+            menuOverlay.classList.add('show');
+            console.log('Menu opened');
+            
+            // 添加触觉反馈（如果支持）
+            if (navigator.vibrate) {
+                navigator.vibrate(10);
+            }
         }
     }
 
