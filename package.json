@@ -19,8 +19,7 @@
   "license": "GPL-3.0",
   "cordova": {
     "platforms": [
-      "android",
-      "ios"
+      "android"
     ],
     "plugins": {
       "cordova-plugin-whitelist": {},
