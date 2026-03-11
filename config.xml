@@ -24,7 +24,7 @@
         <!-- 应用商店相关 -->
         <allow-intent href="market:*" />
 
-        <!-- 应用图标（需要确保这些文件存在） -->
+        <!-- 应用图标 -->
         <icon density="ldpi" src="img/icon-36.png" />
         <icon density="mdpi" src="img/icon-48.png" />
         <icon density="hdpi" src="img/icon-72.png" />
@@ -39,8 +39,8 @@
     <plugin name="cordova-plugin-file" spec="8.1.3" />
     <plugin name="cordova-plugin-file-transfer" spec="2.0.0" />
     <plugin name="cordova-plugin-network-information" spec="3.0.0" />
-    <plugin name="cordova-plugin-dialogs" spec="3.0.0" />
-    <plugin name="cordova-plugin-vibration" spec="4.0.0" />
+    <plugin name="cordova-plugin-dialogs" spec="2.0.2" />
+    <plugin name="cordova-plugin-vibration" spec="3.1.1" />
 
     <!-- 权限设置 -->
     <uses-permission android:name="android.permission.INTERNET" />
